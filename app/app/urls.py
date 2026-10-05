@@ -23,5 +23,6 @@ urlpatterns = [
     path("dashboard/",include("dashboard.urls")),
     path("questions/", include("questions.urls")),
     path("attempts/",include("attempts.urls"),),
+    path("analytics/",include("analytics.urls"),),
     path("", include("pages.urls")),
 ]
