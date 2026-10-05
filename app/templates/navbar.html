@@ -29,11 +29,13 @@
                               </span>
                         </li>
 
-                        <li class="nav-item">
-                              <a class="btn btn-outline-light btn-sm ms-lg-2" href="{% url 'accounts:logout' %}">
+                        <form method="post" action="{% url 'accounts:logout' %}" class="ms-lg-2">
+                              {% csrf_token %}
+
+                              <button type="submit" class="btn btn-outline-light btn-sm">
                                     Logout
-                              </a>
-                        </li>
+                              </button>
+                        </form>
 
                         {% else %}
 

@@ -1,0 +1,16 @@
+body {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+main {
+    min-height: calc(100vh - 140px);
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.navbar-brand {
+    letter-spacing: 0.3px;
+}
