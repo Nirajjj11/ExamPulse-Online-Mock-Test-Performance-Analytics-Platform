@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}
+Test Result | ExamPulse
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+      <div class="mb-4">
+
+            <h1 class="fw-bold">
+                  Test Result
+            </h1>
+
+            <p class="text-muted">
+                  {{ attempt.test.title }}
+            </p>
+
+      </div>
+
+      <div class="row g-4 mb-5">
+
+            <div class="col-md-3">
+                  <div class="card border-0 shadow-sm text-center">
+                        <div class="card-body">
+                              <div class="text-muted small">
+                                    Score
+                              </div>
+                              <h3 class="fw-bold">
+                                    {{ attempt.score }}
+                              </h3>
+                        </div>
+                  </div>
+            </div>
+
+            <div class="col-md-3">
+                  <div class="card border-0 shadow-sm text-center">
+                        <div class="card-body">
+                              <div class="text-muted small">
+                                    Percentage
+                              </div>
+                              <h3 class="fw-bold">
+                                    {{ attempt.percentage|floatformat:2 }}%
+                              </h3>
+                        </div>
+                  </div>
+            </div>
+
+            <div class="col-md-3">
+                  <div class="card border-0 shadow-sm text-center">
+                        <div class="card-body">
+                              <div class="text-muted small">
+                                    Correct
+                              </div>
+                              <h3 class="fw-bold text-success">
+                                    {{ attempt.correct_answers }}
+                              </h3>
+                        </div>
+                  </div>
+            </div>
+
+            <div class="col-md-3">
+                  <div class="card border-0 shadow-sm text-center">
+                        <div class="card-body">
+                              <div class="text-muted small">
+                                    Incorrect
+                              </div>
+                              <h3 class="fw-bold text-danger">
+                                    {{ attempt.incorrect_answers }}
+                              </h3>
+                        </div>
+                  </div>
+            </div>
+
+      </div>
+
+      <div class="card border-0 shadow-sm">
+
+            <div class="card-body">
+
+                  <h4 class="fw-bold mb-4">
+                        Answer Review
+                  </h4>
+
+                  {% for answer in answers %}
+
+                  <div class="border-bottom pb-4 mb-4">
+
+                        <div class="d-flex justify-content-between">
+
+                              <h6 class="fw-bold">
+                                    Question {{ answer.question.question_number }}
+                              </h6>
+
+                              {% if answer.is_correct %}
+
+                              <span class="badge bg-success">
+                                    Correct
+                              </span>
+
+                              {% elif answer.selected_option %}
+
+                              <span class="badge bg-danger">
+                                    Incorrect
+                              </span>
+
+                              {% else %}
+
+                              <span class="badge bg-secondary">
+                                    Unattempted
+                              </span>
+
+                              {% endif %}
+
+                        </div>
+
+                        <p class="mt-3">
+                              {{ answer.question.question }}
+                        </p>
+
+                        <p class="mb-1">
+                              <strong>Your Answer:</strong>
+
+                              {% if answer.selected_option %}
+                              {{ answer.selected_option }}
+                              {% else %}
+                              Not Answered
+                              {% endif %}
+                        </p>
+
+                        <p class="mb-1">
+                              <strong>Correct Answer:</strong>
+                              {{ answer.question.correct_option }}
+                        </p>
+
+                        {% if answer.question.explanation %}
+
+                        <div class="alert alert-light mt-3 mb-0">
+
+                              <strong>
+                                    Explanation:
+                              </strong>
+
+                              {{ answer.question.explanation }}
+
+                        </div>
+
+                        {% endif %}
+
+                  </div>
+
+                  {% empty %}
+
+                  <p class="text-muted">
+                        No answers found.
+                  </p>
+
+                  {% endfor %}
+
+            </div>
+
+      </div>
+
+      <div class="mt-4">
+
+            <a href="{% url 'dashboard:candidate' %}" class="btn btn-primary">
+                  Back to Dashboard
+            </a>
+
+      </div>
+
+</div>
+
+{% endblock %}

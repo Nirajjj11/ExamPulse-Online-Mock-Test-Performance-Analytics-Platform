@@ -1,0 +1,473 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ attempt.test.title }} | ExamPulse
+{% endblock %}
+
+{% block extra_css %}
+<style>
+      .exam-page {
+            min-height: calc(100vh - 140px);
+      }
+
+      .question-card {
+            border-radius: 12px;
+      }
+
+      .option-label {
+            display: block;
+            cursor: pointer;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            transition: 0.2s ease;
+      }
+
+      .option-label:hover {
+            background-color: #f8f9fa;
+            border-color: #0d6efd;
+      }
+
+      .option-label.selected {
+            background-color: #e7f1ff;
+            border-color: #0d6efd;
+      }
+
+      .question-palette {
+            max-height: 500px;
+            overflow-y: auto;
+      }
+
+      .palette-number {
+            width: 42px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 4px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+      }
+
+      .palette-unanswered {
+            background-color: #f1f3f5;
+            color: #212529;
+      }
+
+      .palette-answered {
+            background-color: #198754;
+            color: white;
+      }
+
+      .palette-review {
+            background-color: #ffc107;
+            color: #212529;
+      }
+
+      .timer-box {
+            font-size: 1.1rem;
+            font-weight: 700;
+      }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="exam-page">
+
+      <div class="container-fluid py-4">
+
+            {% if attempt_expired %}
+
+            <div class="container">
+
+                  <div class="alert alert-warning shadow-sm">
+                        Your exam time has expired and your test
+                        has been submitted automatically.
+                  </div>
+
+                  <a href="{% url 'attempts:result' attempt.id %}" class="btn btn-primary">
+                        View Result
+                  </a>
+
+            </div>
+
+            {% else %}
+
+            <div class="container-fluid">
+
+                  <!-- Header -->
+
+                  <div class="card border-0 shadow-sm mb-4">
+
+                        <div class="card-body">
+
+                              <div class="row align-items-center">
+
+                                    <div class="col-md-7">
+
+                                          <div class="small text-muted">
+                                                {{ attempt.test.series.name }}
+                                          </div>
+
+                                          <h4 class="fw-bold mb-1">
+                                                {{ attempt.test.title }}
+                                          </h4>
+
+                                          <div class="small text-muted">
+                                                Candidate:
+                                                <strong>
+                                                      {{ user.get_full_name|default:user.username }}
+                                                </strong>
+                                          </div>
+
+                                    </div>
+
+                                    <div class="col-md-5 text-md-end mt-3 mt-md-0">
+
+                                          <div class="small text-muted">
+                                                Time Remaining
+                                          </div>
+
+                                          <div id="exam-timer" class="timer-box text-danger"
+                                                data-started-at="{{ attempt.started_at|date:'c' }}"
+                                                data-duration="{{ attempt.test.duration_minutes }}">
+                                                Loading...
+                                          </div>
+
+                                    </div>
+
+                              </div>
+
+                        </div>
+
+                  </div>
+
+                  <div class="row g-4">
+
+                        <!-- Question -->
+
+                        <div class="col-lg-8">
+
+                              <div class="card question-card border-0 shadow-sm">
+
+                                    <div class="card-body p-4">
+
+                                          <div class="d-flex justify-content-between mb-4">
+
+                                                <span class="badge bg-primary">
+                                                      Question
+                                                      {{ current_question.question_number }}
+                                                      / {{ question_count }}
+                                                </span>
+
+                                                <span class="badge bg-light text-dark">
+                                                      {{ current_question.marks }} marks
+                                                </span>
+
+                                          </div>
+
+                                          <h5 class="fw-bold mb-4">
+                                                {{ current_question.question }}
+                                          </h5>
+
+                                          <form method="post" action="{% url 'attempts:save-answer' attempt.id %}"
+                                                id="answer-form">
+
+                                                {% csrf_token %}
+
+                                                <input type="hidden" name="question_id"
+                                                      value="{{ current_question.id }}">
+
+                                                <input type="hidden" name="next_question" id="next-question" value="">
+
+                                                <input type="hidden" name="marked_for_review" id="marked-for-review"
+                                                      value="false">
+
+                                                {% for option in current_question.options.all %}
+
+                                                <label class="option-label
+                                            {% if current_answer.selected_option == option.label %}
+                                                selected
+                                            {% endif %}
+                                            ">
+
+                                                      <input type="radio" name="selected_option"
+                                                            value="{{ option.label }}"
+                                                            class="form-check-input me-2 option-input" {% if
+                                                            current_answer.selected_option==option.label %} checked {%
+                                                            endif %}>
+
+                                                      <strong>
+                                                            {{ option.label }}.
+                                                      </strong>
+
+                                                      {{ option.text }}
+
+                                                </label>
+
+                                                {% endfor %}
+
+                                                <div class="d-flex flex-wrap gap-2 mt-4">
+
+                                                      {% if current_question.question_number > 1 %}
+
+                                                      <a href="?question={{ current_question.question_number|add:'-1' }}"
+                                                            class="btn btn-outline-secondary">
+                                                            Previous
+                                                      </a>
+
+                                                      {% endif %}
+
+                                                      <button type="submit" class="btn btn-warning" name="mark"
+                                                            value="true"
+                                                            onclick="document.getElementById('marked-for-review').value='true';">
+                                                            Mark for Review
+                                                      </button>
+
+                                                      {% if current_answer.selected_option %}
+
+                                                      <button type="submit" class="btn btn-outline-danger" name="clear"
+                                                            value="true"
+                                                            onclick="document.querySelectorAll('.option-input').forEach(input => input.checked = false);">
+                                                            Clear Response
+                                                      </button>
+
+                                                      {% endif %}
+
+                                                      {% if current_question.question_number < question_count %} <button
+                                                            type="submit" class="btn btn-primary ms-auto" onclick="
+                                                    document.getElementById('next-question').value='{{ current_question.question_number|add:'1' }}';
+                                                    document.getElementById('marked-for-review').value='false';
+                                                ">
+                                                            Save & Next
+                                                            </button>
+
+                                                            {% else %}
+
+                                                            <button type="submit" class="btn btn-primary ms-auto">
+                                                                  Save Answer
+                                                            </button>
+
+                                                            {% endif %}
+
+                                                </div>
+
+                                          </form>
+
+                                    </div>
+
+                              </div>
+
+                        </div>
+
+                        <!-- Palette -->
+
+                        <div class="col-lg-4">
+
+                              <div class="card border-0 shadow-sm">
+
+                                    <div class="card-body">
+
+                                          <h6 class="fw-bold mb-3">
+                                                Question Palette
+                                          </h6>
+
+                                          <div class="question-palette">
+
+                                                {% for item in question_list %}
+
+                                                {% if item.answer.marked_for_review %}
+
+                                                <a href="?question={{ item.question.question_number }}"
+                                                      class="palette-number palette-review">
+                                                      {{ item.question.question_number }}
+                                                </a>
+
+                                                {% elif item.answer.selected_option %}
+
+                                                <a href="?question={{ item.question.question_number }}"
+                                                      class="palette-number palette-answered">
+                                                      {{ item.question.question_number }}
+                                                </a>
+
+                                                {% else %}
+
+                                                <a href="?question={{ item.question.question_number }}"
+                                                      class="palette-number palette-unanswered">
+                                                      {{ item.question.question_number }}
+                                                </a>
+
+                                                {% endif %}
+
+                                                {% endfor %}
+
+                                          </div>
+
+                                          <hr>
+
+                                          <div class="small">
+
+                                                <div class="mb-2">
+                                                      <span class="badge bg-success">
+                                                            &nbsp;
+                                                      </span>
+                                                      Answered
+                                                </div>
+
+                                                <div class="mb-2">
+                                                      <span class="badge bg-light border">
+                                                            &nbsp;
+                                                      </span>
+                                                      Unanswered
+                                                </div>
+
+                                                <div>
+                                                      <span class="badge bg-warning">
+                                                            &nbsp;
+                                                      </span>
+                                                      Review
+                                                </div>
+
+                                          </div>
+
+                                          <hr>
+
+                                          <form method="post" action="{% url 'attempts:submit' attempt.id %}"
+                                                onsubmit="return confirm('Are you sure you want to submit the test?');">
+
+                                                {% csrf_token %}
+
+                                                <button type="submit" class="btn btn-danger w-100">
+                                                      Submit Test
+                                                </button>
+
+                                          </form>
+
+                                    </div>
+
+                              </div>
+
+                        </div>
+
+                  </div>
+
+            </div>
+
+            {% endif %}
+
+      </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+      const timerElement = document.getElementById("exam-timer");
+
+      if (timerElement) {
+
+            const startedAt =
+                  new Date(
+                        timerElement.dataset.startedAt
+                  );
+
+            const durationMinutes =
+                  parseInt(
+                        timerElement.dataset.duration,
+                        10
+                  );
+
+            const deadline =
+                  startedAt.getTime()
+                  + durationMinutes * 60 * 1000;
+
+            function updateTimer() {
+
+                  const now = Date.now();
+
+                  const remaining =
+                        Math.max(
+                              0,
+                              deadline - now
+                        );
+
+                  const totalSeconds =
+                        Math.floor(
+                              remaining / 1000
+                        );
+
+                  const minutes =
+                        Math.floor(
+                              totalSeconds / 60
+                        );
+
+                  const seconds =
+                        totalSeconds % 60;
+
+                  timerElement.textContent =
+                        `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+
+                  if (remaining <= 0) {
+
+                        clearInterval(timerInterval);
+
+                        alert(
+                              "Time is over. Your test will be submitted."
+                        );
+
+                        document
+                              .getElementById("auto-submit-form")
+                              ?.submit();
+                  }
+            }
+
+            updateTimer();
+
+            const timerInterval =
+                  setInterval(
+                        updateTimer,
+                        1000
+                  );
+      }
+
+
+      document
+            .querySelectorAll(".option-input")
+            .forEach(
+                  function (input) {
+
+                        input.addEventListener(
+                              "change",
+                              function () {
+
+                                    document
+                                          .querySelectorAll(".option-label")
+                                          .forEach(
+                                                function (label) {
+                                                      label.classList.remove(
+                                                            "selected"
+                                                      );
+                                                }
+                                          );
+
+                                    if (this.checked) {
+                                          this
+                                                .closest(".option-label")
+                                                .classList.add(
+                                                      "selected"
+                                                );
+                                    }
+
+                              }
+                        );
+
+                  }
+            );
+</script>
+
+{% endblock %}
