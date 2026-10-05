@@ -1,0 +1,4 @@
+question_number,question,option_a,option_b,option_c,option_d,correct_option,explanation,subject,topic,difficulty,marks,negative_marks
+1,"Who founded the Maurya Empire?","Ashoka","Chandragupta Maurya","Bindusara","Harsha","B","Chandragupta Maurya founded the Maurya Empire around 322 BCE.","History","Ancient India","EASY",1,0.33
+2,"Who wrote Arthashastra?","Kalidasa","Kautilya","Banabhatta","Megasthenes","B","Kautilya is traditionally credited with the Arthashastra.","History","Ancient India","MEDIUM",1,0.33
+3,"The capital of the Maurya Empire under Chandragupta Maurya was?","Pataliputra","Taxila","Ujjain","Mathura","A","Pataliputra was the capital of the Maurya Empire.","History","Ancient India","EASY",1,0.33
