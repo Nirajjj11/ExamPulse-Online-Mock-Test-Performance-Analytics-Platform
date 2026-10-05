@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard | ExamPulse
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+      <div class="mb-4">
+
+            <h2 class="fw-bold">
+                  Welcome,
+                  {{ user.first_name|default:user.username }}
+            </h2>
+
+            <p class="text-muted">
+                  Ready for today's test?
+            </p>
+
+      </div>
+
+      <div class="row g-4">
+
+            <div class="col-md-4">
+
+                  <div class="card border-0 shadow-sm h-100">
+
+                        <div class="card-body">
+
+                              <h5 class="fw-bold">
+                                    Available Tests
+                              </h5>
+
+                              <p class="text-muted">
+                                    View and attempt available tests.
+                              </p>
+
+                              <button class="btn btn-primary" disabled>
+                                    Coming Soon
+                              </button>
+
+                        </div>
+
+                  </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                  <div class="card border-0 shadow-sm h-100">
+
+                        <div class="card-body">
+
+                              <h5 class="fw-bold">
+                                    Test History
+                              </h5>
+
+                              <p class="text-muted">
+                                    Review your previous attempts.
+                              </p>
+
+                              <button class="btn btn-outline-primary" disabled>
+                                    Coming Soon
+                              </button>
+
+                        </div>
+
+                  </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                  <div class="card border-0 shadow-sm h-100">
+
+                        <div class="card-body">
+
+                              <h5 class="fw-bold">
+                                    Performance
+                              </h5>
+
+                              <p class="text-muted">
+                                    Analyze your preparation and progress.
+                              </p>
+
+                              <button class="btn btn-outline-primary" disabled>
+                                    Coming Soon
+                              </button>
+
+                        </div>
+
+                  </div>
+
+            </div>
+
+      </div>
+
+</div>
+
+{% endblock %}
